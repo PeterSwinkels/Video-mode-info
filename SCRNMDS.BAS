@@ -28,20 +28,24 @@ ColorNotSupported:
 ColorError = -1
 RESUME NEXT
 
+IgnoreError:
+RESUME NEXT
+
 ModeNotSupported:
 ScreenMode(ScannedMode).Supported = 0
 RESUME NEXT
 
 SUB DisplayResults
+ON ERROR GOTO IgnoreError
  SCREEN 0: WIDTH 80, 25: COLOR 7, 0: CLS
- PRINT "  Screen: Width: Height: Colors: Mode: Columns: Regen:"
+ PRINT "  Screen: X Pixels:  Y Pixels: Colors: Mode: Columns: Regen:"
  FOR ScreenMode = LBOUND(ScreenMode) TO UBOUND(ScreenMode)
   IF ScreenMode(ScreenMode).Supported THEN
    PRINT SPC(7);
    PRINT USING "##"; ScreenMode;
-   PRINT SPC(4);
+   PRINT SPC(7);
    PRINT USING "###"; ScreenMode(ScreenMode).XPixels;
-   PRINT SPC(5);
+   PRINT SPC(8);
    PRINT USING "###"; ScreenMode(ScreenMode).YPixels;
    PRINT SPC(5);
    PRINT USING "###"; ScreenMode(ScreenMode).Colors;
@@ -75,6 +79,7 @@ FUNCTION GetVideoRegenerationBufferSize&
 END FUNCTION
 
 SUB Main
+ON ERROR GOTO IgnoreError
  SCREEN 0: WIDTH 80, 25: COLOR 7, 0: CLS
  PRINT "Screen Mode Tester - by: Peter Swinkels, ***2012***"
  PRINT "Press any key to continue..."
@@ -102,6 +107,7 @@ SUB ScanModes
    ScreenMode(ScannedMode).ColumnCount = GetColumnCount
    ScreenMode(ScannedMode).Mode = GetVideoMode
    ScreenMode(ScannedMode).RegenBufferSize = GetVideoRegenerationBufferSize&
+   ON ERROR GOTO IgnoreError
    ScreenMode(ScannedMode).XPixels = POINT(0) * 2
    ScreenMode(ScannedMode).YPixels = POINT(1) * 2
   
@@ -112,12 +118,10 @@ SUB ScanModes
     IF ColorError THEN EXIT FOR
     ScreenMode(ScannedMode).Colors = ScreenMode(ScannedMode).Colors + 1
    NEXT ColorV
-   ON ERROR GOTO 0
+   
 
    IF ScreenMode(ScannedMode).Colors = 0 THEN ScreenMode(ScannedMode).Colors = 1
   END IF
  NEXT ScannedMode
-
- ON ERROR GOTO 0
 END SUB
 
